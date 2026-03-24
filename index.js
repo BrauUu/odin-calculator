@@ -78,7 +78,6 @@ const buttons = [
 const displayEl = document.querySelector('#display')
 const calculatorEl = document.querySelector('#calculator')
 
-
 let displayValue = '0'
 let actualOperation = null
 let values = [0, 0]
@@ -87,7 +86,11 @@ let currentIndex = 0
 let shouldCleanDisplay = false
 
 function updateDisplay(value) {
-    displayEl.textContent = value
+    if (value == Infinity) {
+        value = 'ERROR'
+    }
+    displayEl.value = value
+    displayEl.scrollLeft = displayEl.scrollWidth;
 }
 
 function clearMemory() {
@@ -100,15 +103,15 @@ function clearMemory() {
 }
 
 function setOperation(operation) {
-    if (operation === '-' && (values[currentIndex] === 0 || isNaN(values[currentIndex]))) {
-        addDigit('-')
-        return;
-    }
     if (currentIndex === 0) {
         actualOperation = operation
         currentIndex = 1
     }
     else if (currentIndex === 1) {
+        if (!values[1]) {
+            actualOperation = operation
+            return
+        }
 
         let result
 
@@ -181,4 +184,19 @@ buttons.map(button => {
     }
 
     calculatorEl.appendChild(buttonEl)
+})
+
+window.document.addEventListener('keypress', (e) => {
+    buttons.forEach((button) => {
+        if (e.key == button.label) {
+            switch (button.type) {
+                case 'operation':
+                    setOperation(e.key)
+                    break
+                case 'digit':
+                    addDigit(e.key)
+                    break
+            }
+        }
+    })
 })
